@@ -12,7 +12,7 @@ let rl = readline.createInterface({ input, output });
 
 // Задаем вопрос и пишем ответ в файл. При помощи метода question
 rl.question('Davaj poprobuju zapisat fail? ', (answer) => {
-  if (input === 'exit') {
+  if (answer === 'exit') {
     rl.write('Ia bolshe ne budu pisat v fail, potomu chto ty napisal slovo "exit"');
     rl.close();
   } else {
