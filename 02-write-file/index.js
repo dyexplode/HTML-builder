@@ -6,8 +6,6 @@ const { stdin: input, stdout: output } = require('process');
 const writer = new fs.WriteStream(path.join(__dirname, 'out.txt'), {encoding: 'utf-8'});
 
 let rl = readline.createInterface({ input, output });
-// rl.write('Davaj poprobuju zapisat fail? ');
-
 
 // Задаем вопрос и пишем ответ в файл. При помощи метода question
 rl.question('Davaj poprobuju zapisat fail? ', (answer) => {

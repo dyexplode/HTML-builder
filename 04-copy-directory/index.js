@@ -12,7 +12,6 @@ function copyDir(dir, dist) {
       });
     });
   });
-    
 }
 
 copyDir(path.join(__dirname, 'files'), path.join(__dirname, 'files-copy'));
