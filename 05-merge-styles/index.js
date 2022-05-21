@@ -6,27 +6,23 @@ const writer = new fs.WriteStream(
   {encoding: 'utf-8'}
 );
 
-const reader = new fs.ReadStream(path.join(__dirname, 'text.txt'), {encoding: 'utf-8'});
-reader.on('readable', () => {
-  let data = reader.read();
-  if (data) console.log(data);
-});
-
 fs.readdir(path.join(__dirname, 'styles'), { withFileTypes: true } ,(err, data) => {
   // Если ошибка -- выбрасываем её  
   if (err) throw err;
   // Перебираем массив файлов
   data.forEach((file) => {
-    // Если объект это файл, то считываем информацию о нем
-    if (file.isFile()) {
-      fs.stat(path.join(__dirname, 'secret-folder', file.name), (error, data) => {
-        // Если ошибка -- выбрасываем её
-        if (error) throw error;
-        // Выводим все необходимые данные о файле в консоль
-        console.log(`${file.name} - ${path.extname(file.name).slice(1)} - ${data.size / 1000}kb`);
+    // Если объект это файл, который имеет расширение css то считываем его в буффер.
+    if (file.isFile() && path.extname(file.name) === '.css') {
+      const rs = new fs.createReadStream(path.join(__dirname, 'styles', file.name), 'utf-8');
+      const result = [];
+      rs.on('readable', () => {
+        let buff = rs.read();
+        if (buff) result.push(buff);
+      });
+      rs.on('end', () => {
+        writer.write(result.join(''));
       });
     }
   });
-  
 });
   
