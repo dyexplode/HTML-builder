@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
+// Итоговая функция сборки проекта
 async function compile() {
   // Создаем папку с дистрибутивом ... ждем пока создасться ;)
   await fs.promises.mkdir(path.join(__dirname, 'project-dist'), { recursive: true });
@@ -10,22 +11,49 @@ async function compile() {
   mergeStyle();
   // Читаем шаблон в переменную.
   let temp = await rdFile(path.join(__dirname, 'template.html'));
-  // Получаем массив тегов подстановки.
+  // Получаем массив тегов для подмены.
   const nameComponents = getNameComponents(temp);
-  temp = await replaceTemplate(temp, nameComponents);
+  // Запускаем очередь сборки HTML и пишем результат в файл...
+  replaceTemplate(temp, nameComponents);
 }
 
 // Запуск сборки проекта.
 compile();
 
-async function replaceTemplate(template, atc){
-  atc.forEach(async (item) => {
-    const component = await rdFile(path.join(__dirname, 'components', `${getName(item)}.html`));
-    template = template.replace(item, component);
-    const writer = new fs.WriteStream(path.join(__dirname, 'project-dist', 'index.html'), {encoding: 'utf-8'});
-    writer.write(template);
-  });
+function replaceTemplate(template, atc){
+  // Получаем итератор для переборки массива
+  const iterator = atc.shift.bind(atc);
+  const work = async function(item, temp) {
+    let component = await rdFile(path.join(__dirname, 'components', `${getName(item)}.html`));
+    return temp.replace(item, component);
+  };
+
+  function runSeq( work, iterator, template) {
+    return new Promise(() => {
+      (function workItem(template) {
+        let item = iterator();
+        if (item){
+          work(item, template).then(workItem, workItem);
+        } else {
+          const writer = new fs.WriteStream(path.join(__dirname, 'project-dist', 'index.html'), {encoding: 'utf-8'});
+          writer.write(template);
+        }
+      })(template);
+    });
+  }
+  // Запуск конвейера.
+  runSeq(work, iterator, template);
+
 }
+
+// async function replaceTemplate(template, atc){
+//   atc.forEach(async (item) => {
+//     const component = await rdFile(path.join(__dirname, 'components', `${getName(item)}.html`));
+//     template = template.replace(item, component);
+//     const writer = new fs.WriteStream(path.join(__dirname, 'project-dist', 'index.html'), {encoding: 'utf-8'});
+//     writer.write(template);
+//   });
+// }
 
 // Прочитать файл и вернуть строкой
 async function rdFile(fileName) {
@@ -70,7 +98,6 @@ function copyDir(dir, dist) {
     });
   });
 }
-
 
 // Мержим стили
 function mergeStyle() {
