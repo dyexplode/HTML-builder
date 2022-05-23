@@ -28,6 +28,7 @@ function replaceTemplate(template, atc){
     return temp.replace(item, component);
   };
 
+  // Последовательность промисов, поочередная заменяющая шаблоны содержимым файлов.
   function runSeq( work, iterator, template) {
     return new Promise(() => {
       (function workItem(template) {
@@ -41,19 +42,11 @@ function replaceTemplate(template, atc){
       })(template);
     });
   }
+
   // Запуск конвейера.
   runSeq(work, iterator, template);
 
 }
-
-// async function replaceTemplate(template, atc){
-//   atc.forEach(async (item) => {
-//     const component = await rdFile(path.join(__dirname, 'components', `${getName(item)}.html`));
-//     template = template.replace(item, component);
-//     const writer = new fs.WriteStream(path.join(__dirname, 'project-dist', 'index.html'), {encoding: 'utf-8'});
-//     writer.write(template);
-//   });
-// }
 
 // Прочитать файл и вернуть строкой
 async function rdFile(fileName) {

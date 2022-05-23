@@ -10,7 +10,7 @@ let rl = readline.createInterface({ input, output });
 // Задаем вопрос и пишем ответ в файл. При помощи метода question
 rl.question('Davaj poprobuju zapisat fail? ', (answer) => {
   if (answer === 'exit') {
-    rl.write('Ia bolshe ne budu pisat v fail, potomu chto ty napisal slovo "exit"');
+    rl.write('Ia bolshe ne budu pisat v fail, potomu chto ty napisal slovo "exit"\n');
     rl.close();
   } else {
     writer.write(answer + '\n');
@@ -20,7 +20,7 @@ rl.question('Davaj poprobuju zapisat fail? ', (answer) => {
 // Просто всё пишем в файл, проверяя не написано ли слово "exit".
 rl.on('line', (input) => {
   if (input === 'exit') {
-    rl.write('Ia bolshe ne budu pisat v fail, potomu chto ty napisal slovo "exit"');
+    rl.write('Ia bolshe ne budu pisat v fail, potomu chto ty napisal slovo "exit"\n');
     rl.close();
   } else {
     writer.write(input + '\n');
