@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // Итоговая функция сборки проекта
 async function compile() {
-  // Создаем папку с дистрибутивом ... ждем пока создасться ;)
+  // Создаем папку с дистрибутивом ... ждем пока создастся ;)
   await fs.promises.mkdir(path.join(__dirname, 'project-dist'), { recursive: true });
   // Копируем туда ассеты всякие.
   copyDir(path.join(__dirname, 'assets'), path.join(__dirname, 'project-dist', 'assets'));
@@ -21,21 +21,29 @@ async function compile() {
 compile();
 
 function replaceTemplate(template, atc){
-  // Получаем итератор для переборки массива
+  // Получаем итератор для переборки массива, каждый вызов iterator() возвращает следующий элемент массива
   const iterator = atc.shift.bind(atc);
+  // Асинхроная функция которую необходимо перезапускать в последовательности
   const work = async function(item, temp) {
+    // Считываем файл в переменную
     let component = await rdFile(path.join(__dirname, 'components', `${getName(item)}.html`));
+    // Возвращаем результат подмены шаблона
     return temp.replace(item, component);
   };
 
   // Последовательность промисов, поочередная заменяющая шаблоны содержимым файлов.
   function runSeq( work, iterator, template) {
     return new Promise(() => {
+      // Описываем функцию, которую сразу же и вызываем с параметром template;
       (function workItem(template) {
         let item = iterator();
+        // Проверяем наличие элемента массива, если элемента нет, во item === undefined
         if (item){
+          // Вызываем вышеописанную асинхронную функцию,
+          // по завершении которой опять вызываем workItem(template) <-- параметр bind-ится
           work(item, template).then(workItem, workItem);
         } else {
+          // Если элементы закончились, записываем результат в HTML-файл.
           const writer = new fs.WriteStream(path.join(__dirname, 'project-dist', 'index.html'), {encoding: 'utf-8'});
           writer.write(template);
         }
@@ -43,7 +51,7 @@ function replaceTemplate(template, atc){
     });
   }
 
-  // Запуск конвейера.
+  // Запуск последовательности.
   runSeq(work, iterator, template);
 
 }
@@ -73,7 +81,7 @@ function getNameComponents (source) {
   return tagArray;
 }
 
-// Освободиться от экраниовки {{ name_component }} --> name_component.
+// Освободиться от экранировки '{{ name_component }}' --> 'name_component'.
 function getName (tag) {
   return tag.slice(2,-2).trim();
 }
